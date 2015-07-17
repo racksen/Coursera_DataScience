@@ -1,0 +1,45 @@
+---
+title: "My First Markdown File"
+author: "Senthil Ramalingam"
+date: "July 17, 2015"
+output: html_document
+---
+My First R Markdown file to display the Airquality datasets
+===========================================================
+```{r}
+library(datasets)
+data("airquality")
+summary(airquality)
+```
+
+### Let's create a Pairs plot of the data
+```{r}
+pairs(airquality)
+```
+
+### Here is regression model of ozone on wind, solar radation and temprature
+```{r}
+library(stats)
+fit <- lm(Ozone ~ Wind + Solar.R + Temp, data=airquality)
+summary(fit)
+```
+
+### making tables with xtable
+```{r showtable, results='asis'}
+library(xtable)
+xt <- xtable(summary(fit))
+print(xt, type="html")
+```
+
+
+### Inline text computation
+```{r computetime, echo=FALSE }
+time <- format(Sys.time(), "%a %b %d %X %Y")
+rand <- rnorm(1)
+```
+
+The current time is `r time`. My fav random number is `r rand`.
+
+
+
+
