@@ -28,30 +28,32 @@ init_datasets <- function (){
 }
 
 #3. get the initialized datasets
-if(!exists("epaDatasets"))
-  epaDatasets <- init_datasets()
+if(!exists("dfEpa"))
+  dfEpa <- init_datasets()
 
-#View(epaDatasets$SCC)
+#View(dfEpa$SCC)
 
 #4. Filter Combustion by only coal records from SCC
-epaDatasets$SCC_MotorVehicles <- filter(epaDatasets$SCC,  grepl('Vehicles', EI.Sector))
-epaDatasets$SCC_MotorVehicles.SCCIds <- as.character(epaDatasets$SCC_MotorVehicles$SCC)
+dfEpa$SCC_MotorVehicles <- filter(dfEpa$SCC,  grepl('Vehicles', EI.Sector))
+dfEpa$SCC_MotorVehicles.SCCIds <- as.character(dfEpa$SCC_MotorVehicles$SCC)
 
-#4. Summarize the Emissions by year for Baltimore city  
-dsNEI_OnlyByMotorVehicles <- epaDatasets$NEI %>% 
-  filter(fips==24510 & SCC %in% epaDatasets$SCC_MotorVehicles.SCCIds )  %>%
+#5. Summarize the Emissions by year for Baltimore city  
+dsNEI_OnlyByMotorVehicles <- dfEpa$NEI %>% 
+  filter(fips==24510 & SCC %in% dfEpa$SCC_MotorVehicles.SCCIds )  %>%
   select(year,Emissions) %>% 
   group_by(year) %>% 
   summarise(total=sum(Emissions));
 
-#5. set the par 
+#6. set the par 
 par(mfrow= c(1,1))
 
 #7. draw ggplot
 g <- ggplot(dsNEI_OnlyByMotorVehicles,aes(year,total))
 g + geom_point(size=4, alpha=1/2) + 
   geom_smooth(method="lm") +
-  labs(title= "Yearly Emissions (Motor Vehicles - For Baltimore only)") + labs(x="Year", y="Total Emissions")
+  labs(title= "PM(2.5) Emissions in Baltimore, MD  due to Motor Vehicles") + 
+  labs(x="Year", y="Total Emissions(Tones)")
+
 #8. generate png file and switch off the png device immediately
 dev.copy(png, file="plot5.png", width=900, height=580)
 dev.off()

@@ -35,14 +35,18 @@ dfEmissionByYear <- dfEpa$NEI %>%
   select(year,Emissions) %>% 
   group_by(year) %>% 
   summarise(total=sum(Emissions)/10^6)
+#5. set par 
+par(mfrow= c(1,1))
 
-#5. draw box plot to compare the emissions by each year
-#plot(dfEmissionByYear,pch=19, xlab = "Year", ylab =  "Total Emissions (in Millions)", main="Yearly Total Emissions")
-#lines(dfEmissionByYear$year,dfEmissionByYear$total,col="red")
-boxplot(year ~ Emissions, data = dfEmissionByYear,col="skyblue")
+#6. draw box plot to compare the emissions by each year
+plot(dfEmissionByYear,
+     pch=19, xlab = "Year", ylab =  "Total Emissions (tons in Millions)", 
+     main=" PM(2.5) Emissions across USA ")
+reg1 <- lm(dfEmissionByYear$total ~ dfEmissionByYear$year)
+abline(reg1,col="red")
 
-#6. generate png file and switch off the png device immediately
-dev.copy(png, file="plot1.png", width=580, height=480)
+#7. generate png file and switch off the png device immediately
+dev.copy(png, file="plot1.png", width=900, height=480)
 dev.off()
 
 

@@ -27,22 +27,27 @@ init_datasets <- function (){
 }
 
 #3. get the initialized datasets
-if(!exists("epaDatasets"))
-  epaDatasets <- init_datasets()
+if(!exists("dfEpa"))
+  dfEpa <- init_datasets()
 
 #4. Summarize the Emissions by year for the Baltimore City, Maryland (fips == 24510) 
-dfEmissionByYear.MaryLand <- epaDatasets$NEI %>% 
-  filter(fips==24510) %>%
+dfEmission_ForBaltimore<- dfEpa$NEI %>% 
+  filter(fips=="24510") %>%
   select(year,Emissions) %>% 
   group_by(year) %>% 
   summarise(total=sum(Emissions)/10^3);
 
-#5. draw histogram to compare the emissions by each year
-plot(dfEmissionByYear.MaryLand,pch=19, xlab = "Year", ylab =  "Total Emissions (in Thousands)", main="Yearly Total Emissions(Baltimore City, Maryland)")
-lines(dfEmissionByYear.MaryLand$year,dfEmissionByYear.MaryLand$total,col="red")
+#5. set par 
+par(mfrow= c(1,1))
 
-#6. generate png file and switch off the png device immediately
-dev.copy(png, file="plot2.png", width=580, height=480)
+#6. draw plot to compare the emissions by each year
+plot(dfEmission_ForBaltimore,
+     pch=19, xlab = "Year", ylab =  "Total Emissions (tons in Thousands)", 
+     main=" PM(2.5) Emissions in Baltimore County, Maryland ")
+reg1 <- lm(dfEmission_ForBaltimore$total ~ dfEmission_ForBaltimore$year)
+abline(reg1,col="red")
+
+#7. generate png file and switch off the png device immediately
+dev.copy(png, file="plot2.png", width=900, height=480)
 dev.off()
-
 

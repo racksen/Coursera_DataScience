@@ -28,19 +28,16 @@ init_datasets <- function (){
 }
 
 #3. get the initialized datasets
-if(!exists("epaDatasets"))
-  epaDatasets <- init_datasets()
+if(!exists("dfEpa"))
+  dfEpa <- init_datasets()
 
-dim(epaDatasets$NEI)
-
-#4. Filter Combustion by only coal records from SCC
-epaDatasets$SCC_CombustionByCoal <- filter(epaDatasets$SCC,  grepl('Coal', EI.Sector))
-epaDatasets$SCC_CombustionByCoal.SCCIds <- as.character(epaDatasets$SCC_CombustionByCoal$SCC)
-#View(epaDatasets$SCC_CombustionByCoal)
+#4. Filter Combustion by only coal records from SCC and get only the SCC vector out of it
+dfEpa$SCC_CombustionByCoal <- filter(dfEpa$SCC,  grepl('Coal', EI.Sector))
+dfEpa$SCC_CombustionByCoal.SCCIds <- as.character(dfEpa$SCC_CombustionByCoal$SCC)
 
 #4. Summarize the Emissions by year  
-dsNEI_OnlyByCoalCombustion <- epaDatasets$NEI %>% 
-  filter(SCC %in% epaDatasets$SCC_CombustionByCoal.SCCIds )  %>%
+dsNEI_OnlyByCoalCombustion <- dfEpa$NEI %>% 
+  filter(SCC %in% dfEpa$SCC_CombustionByCoal.SCCIds )  %>%
   select(year,Emissions) %>% 
   group_by(year) %>% 
   summarise(total=sum(Emissions)/10^3);
@@ -52,7 +49,8 @@ par(mfrow= c(1,4))
 g <- ggplot(dsNEI_OnlyByCoalCombustion,aes(year,total))
 g + geom_point(size=4, alpha=1/2) + 
   geom_smooth(method="lm") +
-  labs(title= "Yearly Emissions (Coal Combustions only)") + labs(x="Year", y="Total Emissions (in Thousands)")
+  labs(title= "PM(2.5) Emissions in USA due to Coal Combustions ") + 
+  labs(x="Year", y="Total Emissions (tons in Thousands)")
 #8. generate png file and switch off the png device immediately
 dev.copy(png, file="plot4.png", width=900, height=580)
 dev.off()

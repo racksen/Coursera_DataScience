@@ -28,39 +28,38 @@ init_datasets <- function (){
 }
 
 #3. get the initialized datasets
-if(!exists("epaDatasets"))
-  epaDatasets <- init_datasets()
+if(!exists("dfEpa"))
+  dfEpa <- init_datasets()
 
-#View(epaDatasets$SCC)
 
 #4. Filter Combustion by only coal records from SCC
-epaDatasets$SCC_MotorVehicles <- filter(epaDatasets$SCC,  grepl('Vehicles', EI.Sector))
-epaDatasets$SCC_MotorVehicles.SCCIds <- as.character(epaDatasets$SCC_MotorVehicles$SCC)
+dfEpa$SCC_MotorVehicles <- filter(dfEpa$SCC,  grepl('Vehicles', EI.Sector))
+dfEpa$SCC_MotorVehicles.SCCIds <- as.character(dfEpa$SCC_MotorVehicles$SCC)
 
 #5. Fetch only Baltimore and LA Counties NEI data and mutate a new column to identify the county
-dsNEI_byTwoCounties <- epaDatasets$NEI %>% 
+dsNEI_byTwoCounties <- dfEpa$NEI %>% 
   filter(fips %in% c("24510","06037")) %>% 
   rowwise() %>% 
   mutate(county = (if(fips == "24510") "Baltimore City" else "Los Angeles County"))
 
-str(dsNEI_byTwoCounties)
-  
 #6. Summarize the Emissions by year for Baltimore city  
 dsNEI_forMotorVehiclesByTwoCounties <- dsNEI_byTwoCounties %>% 
-  filter(SCC %in% epaDatasets$SCC_MotorVehicles.SCCIds )  %>%
+  filter(SCC %in% dfEpa$SCC_MotorVehicles.SCCIds )  %>%
   select(county,year,Emissions) %>% 
   group_by(county,year) %>% 
   summarise(total=sum(Emissions));
 
-#5. set the par to compare two counties
+#7. set the par to compare two counties
 par(mfrow= c(1,2))
 
-#7. draw ggplot
+#8. draw ggplot
 g <- ggplot(dsNEI_forMotorVehiclesByTwoCounties,aes(year,total))
 g + geom_point(aes(color=county), size=4, alpha=1/2) + 
   geom_smooth(method="lm") + facet_grid(.~county) +
-  labs(title= "Yearly Emissions (Motor Vehicles - For Baltimore and LA County)") + labs(x="Year", y="Total Emissions")
-#8. generate png file and switch off the png device immediately
+  labs(title= "PM(2.5) Emissions in Baltimore, MD and Los Angeles, CA  due to Motor Vehicles") + 
+  labs(x="Year", y="Total Emissions (Tones)")
+
+#9. generate png file and switch off the png device immediately
 dev.copy(png, file="plot6.png", width=900, height=580)
 dev.off()
 
